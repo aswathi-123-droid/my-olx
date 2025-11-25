@@ -16,6 +16,7 @@ const extractUserData = (user) => ({
   photoURL: user.photoURL,
 });
 
+
 // 1. Async Thunk: Sign Up
 export const signupUser = createAsyncThunk(
   'auth/signup',
@@ -23,13 +24,12 @@ export const signupUser = createAsyncThunk(
     try {
       // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
+       
       // Update "Display Name" immediately
       if (name) {
         await updateProfile(userCredential.user, { displayName: name });
       }
 
-      // Return serializable data
       return extractUserData({ ...userCredential.user, displayName: name });
     } catch (error) {
       return rejectWithValue(error.message);

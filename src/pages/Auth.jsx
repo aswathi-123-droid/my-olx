@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import {useDispatch, useSelector} from 'react-redux'
 import { signupUser } from '../features/authSlice';
@@ -29,16 +29,24 @@ const Auth = () => {
       if(formData.email!=='' || formData.password!==''){
           if(activeTab === 'signup' || formData.name!==''){
             dispatch(signupUser(formData))
-            navigate('/products')
+            
           }
           else{
             dispatch(loginUser(formData))
-            navigate('/products')  
+            
             
           }
       }
     }
-console.log(user)
+
+    console.log(user)
+
+    useEffect(()=>{
+      if(user){
+          navigate('/products')
+      } 
+    },[user])
+
    
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

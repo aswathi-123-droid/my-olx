@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { writeBatch, doc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { clearCart } from './cartSlice';
+import { clearCartAsync } from './cartSlice';
 import { fetchProducts } from './productSlice';
 
 export const processCheckout = createAsyncThunk(
@@ -13,9 +13,10 @@ export const processCheckout = createAsyncThunk(
         const itemRef = doc(db, 'products', item.id);
         batch.update(itemRef, { sold: true });
       });
+      
       await batch.commit();
 
-      dispatch(clearCart());       // Clear local cart
+      dispatch(clearCartAsync());       // Clear local cart
       dispatch(fetchProducts());   // Refresh product list to remove sold items
       return { success: true };
     } catch (error) {

@@ -4,14 +4,18 @@ import { db } from '../firebaseConfig';
 
 // Fetch only UNSOLD products
 export const fetchProducts = createAsyncThunk('products/fetch', async () => {
-  const q = query(collection(db, 'products'), where("sold", "==", false));
+  const q = query(collection(db, 'products'));
   const querySnapshot = await getDocs(q);
+  console.log(querySnapshot)
   let products = [];
   querySnapshot.forEach((doc) => {
     products.push({ id: doc.id, ...doc.data() });
   });
   return products;
 });
+
+
+
 
 // Add a new product
 export const addNewProduct = createAsyncThunk('products/add', async (productData) => {
@@ -20,6 +24,7 @@ export const addNewProduct = createAsyncThunk('products/add', async (productData
     sold: false,
     createdAt: new Date().toISOString()
   });
+
   return { id: docRef.id, ...productData, sold: false };
 });
 
@@ -48,6 +53,7 @@ const productSlice = createSlice({
       state.addStatus = 'loading'; // Use a separate status for adding!
     })
     .addCase(addNewProduct.fulfilled, (state, action) => {
+      
       state.addStatus = 'succeeded';
       state.items.push(action.payload);
     })

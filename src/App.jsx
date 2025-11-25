@@ -10,10 +10,10 @@ function App() {
   console.log("App component is rendered")
 
   return (
-    <>
-     <Navbar/>
+    <div className='-mt-8'>
+      <Navbar/>
      <Outlet></Outlet>
-    </>
+    </div>
   )
 }
 
