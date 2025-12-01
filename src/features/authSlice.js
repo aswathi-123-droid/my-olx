@@ -17,27 +17,26 @@ const extractUserData = (user) => ({
 });
 
 
-// 1. Async Thunk: Sign Up
+
 export const signupUser = createAsyncThunk(
   'auth/signup',
   async ({ email, password, name }, { rejectWithValue }) => {
     try {
-      // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
        
-      // Update "Display Name" immediately
-      if (name) {
+    if (name) {
         await updateProfile(userCredential.user, { displayName: name });
       }
 
       return extractUserData({ ...userCredential.user, displayName: name });
     } catch (error) {
+      
       return rejectWithValue(error.message);
     }
   }
 );
 
-// 2. Async Thunk: Login
+
 export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
@@ -53,7 +52,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// 3. Async Thunk: Logout
+
 export const logoutUser = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
@@ -69,19 +68,17 @@ export const logoutUser = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,        // Stores active user info
-    loading: false,    // For spinners
-    error: null,       // For error messages
+    user: null,        
+    loading: false,    
+    error: null,       
   },
   reducers: {
-    // This action is dispatched by onAuthStateChanged
     setUser: (state, action) => {
       state.user = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      // --- Sign Up Handlers ---
       .addCase(signupUser.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(signupUser.fulfilled, (state, action) => {
         state.loading = false;
@@ -91,7 +88,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // --- Login Handlers ---
       .addCase(loginUser.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
@@ -101,7 +97,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // --- Logout Handlers ---
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
       });

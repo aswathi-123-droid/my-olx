@@ -13,7 +13,6 @@ import { auth } from './firebaseConfig.js'
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // User is signed in, dispatch to Redux
     store.dispatch(setUser({
       uid: user.uid,
       email: user.email,
@@ -21,7 +20,6 @@ onAuthStateChanged(auth, (user) => {
       photoURL: user.photoURL
     }));
   } else {
-    // User is signed out
     store.dispatch(setUser(null));
   }
 });

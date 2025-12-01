@@ -1,158 +1,160 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { addNewProduct } from '../features/productSlice'; // Your redux action
-import { FiShoppingCart, FiPlus, FiLogOut } from 'react-icons/fi';
+import { useForm } from 'react-hook-form'; // Import RHF
+import { addNewProduct } from '../features/productSlice'; 
 import { HiOutlineShoppingBag } from 'react-icons/hi2';
 
 const SellPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // 1. State for Form Data
-  const [formData, setFormData] = useState({
-    name: '',        // Maps to "Title" in UI
-    price: '',
-    description: '',
-    category: '',    // Added to match UI
-    condition: ''    // Added to match UI
-  });
+ 
+  const { 
+    register, 
+    handleSubmit, 
+    watch,
+    formState: { errors, isSubmitting } 
+  } = useForm();
 
-  // 2. State for File Input UI
-  const [fileName, setFileName] = useState("No file chosen");
+ 
+  const imageFileList = watch('image');
+  const fileName = imageFileList?.[0]?.name || "No file chosen";
 
-  // Handle Text/Select Changes
-  const handleInputChange = (e) => {
-    const { id, value } = e.target; // Using 'id' to match the UI labels below
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
 
-  // Handle File Change
-  const handleFileChange = (event) => {
-    if (event.target.files.length > 0) {
-      setFileName(event.target.files[0].name);
-    } else {
-      setFileName("No file chosen");
+  const uploadToCloudinary = async (file) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "e0oh6w9h"); 
+    data.append("cloud_name", "dvmkmpjll");   
+
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dvmkmpjll/image/upload", 
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+      const fileData = await response.json();
+      return fileData.secure_url;
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      throw error;
     }
   };
 
-  // Handle Submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
+ 
+  const onSubmit = async (data) => {
+    try {
+      const file = data.image[0];
+      const imageUrl = await uploadToCloudinary(file);
 
-    // Basic Validation
-    if (!formData.name || !formData.price || !formData.description) {
-      alert("Please fill in the required fields");
-      return;
+
+      await dispatch(addNewProduct({
+        name: data.name,
+        price: Number(data.price),
+        description: data.description,
+        category: data.category,
+        condition: data.condition,
+        image: imageUrl
+      })).unwrap();
+
+      navigate('/');
+      
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("Something went wrong during upload.");
     }
-
-    // Dispatch to Redux
-    dispatch(addNewProduct({
-      name: formData.name,
-      price: Number(formData.price),
-      description: formData.description,
-      category: formData.category,
-      condition: formData.condition,
-      image: fileName // You might want to handle actual file uploading logic here
-    }));
-
-    navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-       {/* Main Content */}
       <main className="flex justify-center items-center py-10 px-4">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
+         
           <div className="flex items-center space-x-3 mb-6">
             <HiOutlineShoppingBag className="text-teal-400 text-4xl" />
             <h2 className="text-3xl font-semibold text-gray-800">Sell an Item</h2>
           </div>
-          <p className=" flex text-gray-600 mb-8">List your item for others to purchase</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Title (Mapped to formData.name) */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            
+            
             <div>
               <label htmlFor="name" className="flex text-sm font-medium text-gray-700 mb-1">Title *</label>
               <input 
                 type="text" 
                 id="name" 
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-teal-500 focus:border-teal-500 outline-none" 
-                placeholder="iPhone 13 Pro Max" 
-                required
+                className={`w-full border rounded-md p-2.5 outline-none ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                {...register("name", { required: "Title is required" })}
               />
+              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
             </div>
-
-            {/* Description */}
+            
+           
             <div>
               <label htmlFor="description" className="flex text-sm font-medium text-gray-700 mb-1">Description *</label>
               <textarea 
                 id="description" 
                 rows="4" 
-                value={formData.description}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-teal-500 focus:border-teal-500 outline-none resize-none" 
-                placeholder="Describe your item..."
-                required
+                className={`w-full border rounded-md p-2.5 outline-none resize-none ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
+                {...register("description", { required: "Description is required" })}
               ></textarea>
+              {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
             </div>
 
-            {/* Price and Category */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               <div>
                 <label htmlFor="price" className="flex text-sm font-medium text-gray-700 mb-1">Price ($) *</label>
                 <input 
                   type="number" 
                   id="price" 
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  min="0"
-                  className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-teal-500 focus:border-teal-500 outline-none" 
-                  placeholder="99.99" 
-                  required
+                  min="0" 
+                  className={`w-full border rounded-md p-2.5 outline-none ${errors.price ? 'border-red-500' : 'border-gray-300'}`}
+                  {...register("price", { required: "Price is required" , min: {value: 0, message: "Price cannot be negative" }})}
                 />
+                {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price.message}</p>}
               </div>
+
+              
               <div>
-                <label htmlFor="category" className="flex text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label htmlFor="category" className="flex text-sm font-medium text-gray-700 mb-1">Category *</label>
                 <select 
                   id="category" 
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-teal-500 focus:border-teal-500 text-gray-500 outline-none bg-white"
+                  className={`w-full border rounded-md p-2.5 outline-none bg-white ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
+                  {...register("category", { required: "Category is required" })}
                 >
                   <option value="">Select category</option>
                   <option value="electronics">Electronics</option>
                   <option value="clothing">Clothing</option>
                   <option value="furniture">Furniture</option>
                 </select>
+                {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
               </div>
             </div>
-
-            {/* Condition */}
+            
+           
             <div>
-              <label htmlFor="condition" className="flex text-sm font-medium text-gray-700 mb-1">Condition</label>
+              <label htmlFor="condition" className="flex text-sm font-medium text-gray-700 mb-1">Condition *</label>
               <select 
                 id="condition" 
-                value={formData.condition}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-teal-500 focus:border-teal-500 text-gray-500 outline-none bg-white"
+                className={`w-full border rounded-md p-2.5 outline-none bg-white ${errors.condition ? 'border-red-500' : 'border-gray-300'}`}
+                {...register("condition", { required: "Condition is required" })}
               >
                 <option value="">Select condition</option>
                 <option value="new">New</option>
                 <option value="used">Used</option>
                 <option value="refurbished">Refurbished</option>
               </select>
+              {errors.condition && <p className="text-red-500 text-xs mt-1">{errors.condition.message}</p>}
             </div>
 
-            {/* Product Image (File Upload UI) */}
+           
             <div>
-              <label className="flex text-sm font-medium text-gray-700 mb-1">Product Image</label>
-              <div className="flex items-center border border-gray-300 rounded-md p-2 bg-white">
+              <label className="flex text-sm font-medium text-gray-700 mb-1">Product Image *</label>
+              <div className={`flex items-center border rounded-md p-2 bg-white ${errors.image ? 'border-red-500' : 'border-gray-300'}`}>
                 <label 
                   htmlFor="product-image-upload" 
                   className="bg-teal-50 text-teal-700 font-medium py-2 px-4 rounded cursor-pointer hover:bg-teal-100 transition-colors"
@@ -163,19 +165,27 @@ const SellPage = () => {
                   id="product-image-upload" 
                   type="file" 
                   className="hidden" 
-                  onChange={handleFileChange}
                   accept="image/*"
+                  {...register("image", { required: "Product image is required" })}
                 />
-                <span className="ml-4 text-gray-500 truncate max-w-xs">{fileName}</span>
+                <span className="ml-4 text-gray-500 truncate max-w-xs">
+                  {fileName}
+                </span>
               </div>
+              {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>}
             </div>
 
-            {/* Submit Button */}
+            
             <button 
               type="submit" 
-              className="w-full bg-teal-400 text-white font-semibold py-3 rounded-md hover:bg-teal-500 transition-colors shadow-sm"
+              disabled={isSubmitting} 
+              className={`w-full text-white font-semibold py-3 rounded-md transition-colors shadow-sm ${
+                isSubmitting 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-teal-400 hover:bg-teal-500'
+              }`}
             >
-              List Product
+              {isSubmitting ? 'Uploading Product...' : 'List Product'}
             </button>
           </form>
         </div>

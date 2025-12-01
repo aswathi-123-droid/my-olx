@@ -15,7 +15,7 @@ const CartPage = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto">
         
-        {/* Page Header */}
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#2dd4bf]">Shopping Cart</h1>
           <p className="text-gray-500 mt-1">
@@ -24,7 +24,6 @@ const CartPage = () => {
         </div>
 
         {items.length === 0 ? (
-          /* Empty State - Matches First Image */
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-16 flex flex-col items-center justify-center text-center">
             <ShoppingCart className="w-24 h-24 text-gray-400 mb-6" strokeWidth={1.5} />
             <h2 className="text-xl font-medium text-gray-500 mb-8">Your cart is empty</h2>
@@ -36,26 +35,21 @@ const CartPage = () => {
             </button>
           </div>
         ) : (
-          /* Filled State - Matches Second Image */
           <div className="space-y-6">
-            
-            {/* Cart Items List */}
             <div className="space-y-4">
               {items.map((item) => (
                 <div 
                   key={item.id} 
                   className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col sm:flex-row items-center gap-6"
                 >
-                  {/* Product Image */}
                   <div className="w-24 h-24 bg-gray-100 rounded-lg shrink-0 p-2">
                      <img 
-                        src={item.image || "https://via.placeholder.com/150"} 
+                        src={item.image || "https://placehold.co/150"} 
                         alt={item.name} 
                         className="w-full h-full object-contain mix-blend-multiply"
                      />
                   </div>
 
-                  {/* Product Details */}
                   <div className="flex-1 w-full text-center sm:text-left">
                     <div className="flex justify-between items-start">
                       <div>
@@ -65,7 +59,7 @@ const CartPage = () => {
                         </p>
                       </div>
                       
-                      {/* Delete Button (Mobile: hidden, Desktop: visible) */}
+                      
                       <button 
                         onClick={() => dispatch(removeItemFromCart(item.id))}
                         className="text-red-400 hover:text-red-600 transition-colors p-2 hidden sm:block"
@@ -75,7 +69,7 @@ const CartPage = () => {
                       </button>
                     </div>
 
-                    {/* Quantity Controls & Subtotal */}
+                  
                     <div className="flex items-center justify-between mt-4">
                       
                       <div className="text-right sm:hidden">
@@ -86,17 +80,16 @@ const CartPage = () => {
                             <Trash2 className="w-4 h-4" /> Remove
                           </button>
                       </div>
-
-                      <span className=" font-bold text-gray-900 hidden sm:block">
-                        ${Number(item.price).toFixed(2)}
-                      </span>
                     </div>
+                     <p className=" font-bold text-gray-900 text-right text-2xl">
+                        ${Number(item.price).toFixed(2)}
+                     </p>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Summary Section */}
+            
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
               <div className="flex justify-between items-center mb-8">
                 <span className="text-xl font-bold text-gray-900">Total</span>

@@ -16,8 +16,8 @@ export const processCheckout = createAsyncThunk(
       
       await batch.commit();
 
-      dispatch(clearCartAsync());       // Clear local cart
-      dispatch(fetchProducts());   // Refresh product list to remove sold items
+      dispatch(clearCartAsync());      
+      dispatch(fetchProducts());   
       return { success: true };
     } catch (error) {
       return rejectWithValue(error.message);

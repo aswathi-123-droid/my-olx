@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { collection, getDocs, addDoc, query, where } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
-// Fetch only UNSOLD products
+
 export const fetchProducts = createAsyncThunk('products/fetch', async () => {
   const q = query(collection(db, 'products'));
   const querySnapshot = await getDocs(q);
@@ -17,7 +17,6 @@ export const fetchProducts = createAsyncThunk('products/fetch', async () => {
 
 
 
-// Add a new product
 export const addNewProduct = createAsyncThunk('products/add', async (productData) => {
   const docRef = await addDoc(collection(db, 'products'), {
     ...productData,
@@ -34,10 +33,9 @@ const productSlice = createSlice({
   reducers: {},
  extraReducers: (builder) => {
   builder
-    // --- FETCHING ---
     .addCase(fetchProducts.pending, (state) => {
       state.status = 'loading';
-      state.error = null; // Clear previous errors
+      state.error = null; 
     })
     .addCase(fetchProducts.fulfilled, (state, action) => {
       state.status = 'succeeded';
@@ -45,12 +43,12 @@ const productSlice = createSlice({
     })
     .addCase(fetchProducts.rejected, (state, action) => {
       state.status = 'failed';
-      state.error = action.error.message; // Capture the error message
+      state.error = action.error.message; 
     })
 
-    // --- ADDING ---
+  
     .addCase(addNewProduct.pending, (state) => {
-      state.addStatus = 'loading'; // Use a separate status for adding!
+      state.addStatus = 'loading';
     })
     .addCase(addNewProduct.fulfilled, (state, action) => {
       
